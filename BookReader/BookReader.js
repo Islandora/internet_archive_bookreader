@@ -142,7 +142,6 @@ function BookReader() {
 
     // Allow images to be loaded with AJAX
     this.loadWithAjax = false;
-    this.ajaxHeaders = {};
 
     return this;
 };
@@ -410,15 +409,16 @@ BookReader.prototype.setClickHandler2UP = function( element, data, handler) {
 
 // loadImage()
 //______________________________________________________________________________
-BookReader.prototype.loadImage = function(src, img) {
+BookReader.prototype.loadImage = function(src, index, img) {
     if (this.loadWithAjax) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', src);
         xhr.responseType = "arraybuffer";
-        if (this.ajaxHeaders) {
-            for (var headerName in this.ajaxHeaders) {
-                if (this.ajaxHeaders.hasOwnProperty(headerName) && this.ajaxHeaders[headerName]) {
-                    xhr.setRequestHeader(headerName, this.ajaxHeaders[headerName]);
+        if (typeof(this.getAjaxHeaders) !== 'undefined') {
+            var headers = this.getAjaxHeaders(index);
+            for (var headerName in headers) {
+                if (headers.hasOwnProperty(headerName) && headers[headerName]) {
+                    xhr.setRequestHeader(headerName, headers[headerName]);
                 }
             }
         }
@@ -554,8 +554,7 @@ BookReader.prototype.drawLeafsOnePage = function() {
             $(img).css('width', width+'px');
             $(img).css('height', height+'px');
             $(div).append(img);
-            this.loadImage(this._getPageURI(index, this.reduce, 0), img);
-
+            this.loadImage(this._getPageURI(index, this.reduce, 0), index, img);
         } else {
             //console.log("not displaying " + indicesToDisplay[i] + ' score=' + jQuery.inArray(indicesToDisplay[i], this.displayedIndices));            
         }
@@ -755,7 +754,8 @@ BookReader.prototype.drawLeafsThumbnail = function( seekIndex ) {
                     .css({'width': leafWidth+'px', 'height': leafHeight+'px' })
                     .addClass('BRlazyload')
                     // Store the URL of the image that will replace this one
-                    .data('srcURL',  this._getPageURI(leaf, thumbReduce));
+                    .data('srcURL', this._getPageURI(leaf, thumbReduce))
+                    .data('index', leaf);
                 $(link).append(img);
                 //console.log('displaying thumbnail: ' + leaf);
             }   
@@ -880,7 +880,7 @@ BookReader.prototype.lazyLoadImage = function (dummyImage) {
         });
                  
     // replace with the new img
-    this.loadImage($(dummyImage).data('srcURL'), img);
+    this.loadImage($(dummyImage).data('srcURL'), $(dummyImage).data('index'), img);
     $(dummyImage).before(img).remove();
     
     img = null; // tidy up closure
@@ -2554,7 +2554,7 @@ BookReader.prototype.prefetchImg = function(index) {
                 'background-color': '#efefef'
             });
         }
-        this.loadImage(pageURI, img);
+        this.loadImage(pageURI, index, img);
         img.uri = pageURI; // browser may rewrite src so we stash raw URI here
         this.prefetchedImgs[index] = img;
     }
