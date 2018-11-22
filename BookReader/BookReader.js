@@ -3480,7 +3480,7 @@ BookReader.prototype.addSearchResult = function(queryString, pageIndex) {
     queryString = queryString.replace(re, '<a href="#" onclick="br.jumpToIndex('+pageIndex+'); return false;">$1</a>')
 
     var marker = $('<div class="search" style="top:'+(-$('#BRcontainer').height())+'px; left:' + percentThrough + ';" title="' + uiStringSearch + '"><div class="query">'
-        + queryString + '<span>' + uiStringPage + ' ' + pageNumber + '</span></div>')
+        + queryString + ' ' + '<span>' + uiStringPage + ' ' + pageNumber + '</span></div>')
     .data({'self': this, 'pageIndex': pageIndex })
     .appendTo('#BRnavline').bt({
         contentSelector: '$(this).find(".query")',
